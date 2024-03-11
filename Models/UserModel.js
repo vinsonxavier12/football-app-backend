@@ -3,6 +3,8 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+const Player = require("./playerModel");
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -58,9 +60,16 @@ userSchema.methods.isPasswordValid = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Password hashing
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next;
+  if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
+});
+
+// If role is player, adding in player collection
+userSchema.pre("save", async function (next) {
+  if (!this.role === "player") return next();
+  await Player.create(this);
 });
 
 module.exports = mongoose.model("User", userSchema, "Users");
