@@ -1,5 +1,7 @@
-module.exports = (err, req, res, next) => {
-  res.status(500).json({
-    err,
+module.exports = (error, req, res, next) => {
+  res.status(error.statusCode).json({
+    statusCode: error.statusCode,
+    message: error.message,
+    stack: error.stack,
   });
 };

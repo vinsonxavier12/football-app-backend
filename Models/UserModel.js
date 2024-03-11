@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,7 +21,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "A user must have an email"],
-      // unique: true,
+      unique: true,
       lowercase: true,
       validate: [validator.isEmail, "Email is invalid"],
     },
@@ -28,8 +30,35 @@ const userSchema = new mongoose.Schema(
       select: false,
       required: [true, "A user must have a password"],
     },
+    passwordUpdatedAt: {
+      type: Date,
+    },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
+
+userSchema.statics.getSignedJwtToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_KEY, {
+    expiresIn: process.env.JWT_EXPIRY,
+  });
+};
+
+userSchema.methods.hasPasswordChangedAfterTokenIssued = function (
+  jwtTimeStamp,
+) {
+  if (this.passwordUpdatedAt) {
+    return jwtTimeStamp < this.passwordUpdatedAt.getTime() / 1000;
+  }
+  return false;
+};
+
+userSchema.methods.isPasswordValid = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next;
+  this.password = await bcrypt.hash(this.password, 12);
+});
 
 module.exports = mongoose.model("User", userSchema, "Users");
