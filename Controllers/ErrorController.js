@@ -1,7 +1,8 @@
 module.exports = (error, req, res, next) => {
-  res.status(error.statusCode).json({
+  const formattedStack = error.stack.split("\n");
+  res.status(error.statusCode || 400).json({
     statusCode: error.statusCode,
     message: error.message,
-    stack: error.stack,
+    stack: formattedStack,
   });
 };

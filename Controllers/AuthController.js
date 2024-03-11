@@ -7,16 +7,19 @@ const AppError = require("../utilities/appError");
 // For authorizing protected routes
 exports.protect = CatchAsyncError(async (req, res, next) => {
   // Checking cookie in request and raising error if not found
-  if (!req.cookies.jwt) return next("Login to get access for this route");
+  if (!req.cookies.jwt)
+    return next(new AppError("Login to get access for this route", 403));
   // Decoding jwt inside cookie and if signature failed jwt throws error
   const jwtDecoded = jwt.verify(req.cookies.jwt, process.env.JWT_KEY);
   // Fetching the user from DB and if not found throws an error
   const user = await User.findById(jwtDecoded.id);
-  if (!user) return next("No user found from token ID. Please login again");
+  if (!user) return next(new AppError("No user found with the ID", 401));
   // Checking if user have changed password after token is issued
   // In that case, log out user
   if (user.hasPasswordChangedAfterTokenIssued(jwtDecoded.iat))
-    return next("Your password has been changed. Please login again");
+    return next(
+      new AppError("Your password has been changed. Please login again", 403)
+    );
 
   // User is authenticated, so adding user in req object for further use
   req.user = user;
@@ -31,7 +34,7 @@ exports.createAndSendCookie = (user, statusCode, res) => {
     secure: false,
     httpOnly: true,
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000,
+      Date.now() + process.env.JWT_COOKIE_EXPIRY_IN_DAYS * 24 * 60 * 60 * 1000
     ),
   };
   // Setting user password to undefined to prevent displaying password
@@ -50,10 +53,10 @@ exports.signup = CatchAsyncError(async (req, res, next) => {
 exports.login = CatchAsyncError(async (req, res, next) => {
   // If there is not email or password throwing error
   if (!req.body.email || !req.body.password)
-    return next("Missing email or password");
+    return next(new AppError("Missing email or password", 400));
   // Finding user with password to validate password
   const user = await User.findOne({ email: req.body.email }).select(
-    "+password",
+    "+password"
   );
   // Checking is password valid by schema method
   // If invalid or user not found throwing error invalid credentials

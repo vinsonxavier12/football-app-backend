@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      // If we use select false, it is throwing error on controller
+      // query projection. Use with warning
       select: false,
       required: [true, "A user must have a password"],
     },
@@ -34,7 +36,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
   },
-  { versionKey: false },
+  { versionKey: false }
 );
 
 userSchema.statics.getSignedJwtToken = (id) => {
@@ -44,7 +46,7 @@ userSchema.statics.getSignedJwtToken = (id) => {
 };
 
 userSchema.methods.hasPasswordChangedAfterTokenIssued = function (
-  jwtTimeStamp,
+  jwtTimeStamp
 ) {
   if (this.passwordUpdatedAt) {
     return jwtTimeStamp < this.passwordUpdatedAt.getTime() / 1000;
