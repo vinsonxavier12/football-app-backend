@@ -9,23 +9,33 @@ exports.createOne = (Model, statusCode = 201) =>
     res.status(statusCode).send(document);
   });
 
-exports.getOne = (Model, projection, populateOptions) =>
+exports.getOne = (Model, projection, populateOptions, postProjectionOptions) =>
   CatchAsyncError(async (req, res, next) => {
     const document = await Model.findById(req.params.id, projection).populate(
       populateOptions
     );
     if (!document) return next(new AppError("No document found", 404));
+    if (postProjectionOptions)
+      document = projectOne(
+        document,
+        postProjectionOptions.inclusiveFields,
+        postProjectionOptions.exclusiveFields
+      );
     res.status(200).send(document);
   });
 
-exports.getAll = (Model, projection, populateOptions) =>
+exports.getAll = (Model, projection, populateOptions, postProjectionOptions) =>
   CatchAsyncError(async (req, res, next) => {
-    const documents = await Model.find(null, projection).populate(
+    let documents = await Model.find(null, projection).populate(
       populateOptions
     );
-    // const result = projectMany(documents, null, ["players"]);
-    const result = projectOne(documents[0], null, ["name"]);
-    console.log(result);
+    // If postprojection options is given, calling projectMany custom utility fn
+    if (postProjectionOptions)
+      documents = projectMany(
+        documents,
+        postProjectionOptions.inclusiveFields,
+        postProjectionOptions.exclusiveFields
+      );
     res.status(200).json({
       results: documents.length,
       data: documents,

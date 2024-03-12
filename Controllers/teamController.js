@@ -2,7 +2,9 @@ const factory = require("./handlerFactory");
 const Team = require("../Models/teamModel");
 
 exports.createTeam = factory.createOne(Team);
-exports.getAllTeams = factory.getAll(Team);
+exports.getAllTeams = factory.getAll(Team, null, null, {
+  exclusiveFields: ["players"],
+});
 exports.getTeam = factory.getOne(Team, null, {
   path: "players",
   select: "-team",

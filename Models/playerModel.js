@@ -17,6 +17,16 @@ const playerSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
+// Query middleware for populating team by default
+playerSchema.pre(/^find/, function (next) {
+  // If the query already has a populate object, neglecting populating
+  // generically without select specified
+  // Higher preference for specific populate methods rather than generic
+  if (this._mongooseOptions.populate) return next();
+  this.populate({ path: "team" });
+  next();
+});
+
 // After creation of a player, adding the
 // player to players array in team model
 playerSchema.post("save", async function () {

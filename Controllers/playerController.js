@@ -1,10 +1,14 @@
-const CatchAsyncError = require("../utilities/CatchAsyncError");
 const factory = require("./handlerFactory");
-const User = require("../Models/UserModel");
 const Player = require("../Models/playerModel");
 
-exports.getAllPlayers = factory.getAll(Player);
+exports.getAllPlayers = factory.getAll(Player, null, {
+  path: "team",
+  select: "name shortname",
+});
 exports.createPlayer = factory.createOne(Player);
-exports.getPlayer = factory.getOne(Player);
+exports.getPlayer = factory.getOne(Player, null, {
+  path: "team",
+  select: "-players",
+});
 exports.updatePlayer = factory.updateOne(Player);
 exports.deletePlayer = factory.deleteOne(Player);

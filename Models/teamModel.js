@@ -32,11 +32,14 @@ const teamSchema = new mongoose.Schema(
     versionKey: false,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    // Adding virtuals to true has an effect of adding id to
+    // every document. If you don't want add a property id: false
+    id: false,
   }
 );
 
 teamSchema.virtual("playersCount").get(function () {
-  return this.players.length;
+  return this.players?.length;
 });
 
 teamSchema.post(/^find/, function () {
