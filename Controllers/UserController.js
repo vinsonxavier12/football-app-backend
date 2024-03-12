@@ -1,7 +1,7 @@
 const User = require("../Models/UserModel");
-const CatchAsyncError = require("../utilities/CatchAsyncError");
+const factory = require("./handlerFactory");
 
-exports.getAllUsers = CatchAsyncError(async (req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({ results: users.length, users });
-});
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);

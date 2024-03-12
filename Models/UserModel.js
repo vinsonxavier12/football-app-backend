@@ -15,9 +15,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "A user must have a role"],
       enum: {
-        values: ["player", "manager", "admin", "team-admin", "staff", "user"],
-        message:
-          "Role must either be `player`, `manager`, `admin`, `team-admin`, `staff` or `user` ",
+        values: ["admin", "team-admin", "user"],
+        message: "Role must either be `admin`, `team-admin` or `user`",
       },
     },
     email: {
