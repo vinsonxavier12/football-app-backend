@@ -7,6 +7,7 @@ const AuthRouter = require("./Routers/AuthRouter");
 const playerRouter = require("./Routers/playerRouter");
 const leagueRouter = require("./Routers/leagueRouter");
 const teamRouter = require("./Routers/teamRouter");
+const matchRouter = require("./Routers/matchRouter");
 const ErrorController = require("./Controllers/ErrorController");
 
 const app = express();
@@ -19,6 +20,7 @@ app.use("/api/users", UserRouter);
 app.use("/api/players", playerRouter);
 app.use("/api/leagues", leagueRouter);
 app.use("/api/teams", teamRouter);
+app.use("/api/matches", matchRouter);
 
 app.use(ErrorController);
 

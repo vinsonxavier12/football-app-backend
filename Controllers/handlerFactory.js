@@ -1,4 +1,5 @@
 const CatchAsyncError = require("../utilities/CatchAsyncError");
+const APIQueries = require("../utilities/apiQueries");
 const AppError = require("../utilities/appError");
 const { projectMany, projectOne } = require("../utilities/projectFields");
 
@@ -26,10 +27,13 @@ exports.getOne = (Model, projection, populateOptions, postProjectionOptions) =>
 
 exports.getAll = (Model, projection, populateOptions, postProjectionOptions) =>
   CatchAsyncError(async (req, res, next) => {
-    let documents = await Model.find(null, projection).populate(
-      populateOptions
-    );
-    // If postprojection options is given, calling projectMany custom utility fn
+    // Implemented a APIQueries class to do filtering on request query itself
+    let apiQueries = new APIQueries(
+      Model.find({}, projection),
+      req.query
+    ).filter();
+    // Awaiting APIQueries query to get the document and populating
+    let documents = await apiQueries.mongooseQuery.populate(populateOptions);
     if (postProjectionOptions)
       documents = projectMany(
         documents,
